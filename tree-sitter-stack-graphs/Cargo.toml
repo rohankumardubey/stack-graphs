@@ -21,4 +21,10 @@ test = false
 
 [dependencies]
 stack-graphs = { version="0.3", path="../stack-graphs" }
-tree-sitter-graph = "0.2"
+thiserror = "1.0"
+
+[dependencies.tree-sitter-graph]
+version ="0.2"
+#path = "../../tree-sitter-graph"
+git = "https://github.com/tree-sitter/tree-sitter-graph"
+rev = "9677a357a6b7c0bcbdc3b85d596b3b0609213ce2"
