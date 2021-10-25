@@ -13,6 +13,7 @@ authors = [
 edition = "2018"
 
 [features]
+default = ["lsp-positions"]
 copious-debugging = []
 
 [lib]
@@ -24,6 +25,7 @@ controlled-option = "0.4"
 either = "1.6"
 fxhash = "0.2"
 libc = "0.2"
+lsp-positions = { version="0.1", path="../lsp-positions", optional=true }
 smallvec = { version="1.6", features=["union"] }
 
 [dev-dependencies]

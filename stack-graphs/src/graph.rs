@@ -613,6 +613,18 @@ impl StackGraph {
         self.node_id_handles.set_handle_for_id(id, handle);
         handle
     }
+
+    /// Returns the position of the code within a source file that a stack graph node "belongs to".
+    #[cfg(feature = "lsp-positions")]
+    pub fn span(&self, node: Handle<Node>) -> Option<&lsp_positions::Span> {
+        self.spans.get(node)
+    }
+
+    /// Returns a mutable reference to the position information for a stack graph node.
+    #[cfg(feature = "lsp-positions")]
+    pub fn span_mut(&mut self, node: Handle<Node>) -> &mut lsp_positions::Span {
+        &mut self.spans[node]
+    }
 }
 
 #[doc(hidden)]
@@ -1306,6 +1318,8 @@ pub struct StackGraph {
     pub(crate) files: Arena<File>,
     file_handles: FxHashMap<&'static str, Handle<File>>,
     pub(crate) nodes: Arena<Node>,
+    #[cfg(feature = "lsp-positions")]
+    spans: SupplementalArena<Node, lsp_positions::Span>,
     node_id_handles: NodeIDHandles,
     jump_to_node: Handle<Node>,
     root_node: Handle<Node>,
@@ -1332,6 +1346,8 @@ impl Default for StackGraph {
             files: Arena::new(),
             file_handles: FxHashMap::default(),
             nodes,
+            #[cfg(feature = "lsp-positions")]
+            spans: SupplementalArena::new(),
             node_id_handles: NodeIDHandles::new(),
             jump_to_node,
             root_node,
