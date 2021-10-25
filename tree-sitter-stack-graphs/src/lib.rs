@@ -5,7 +5,10 @@
 // Please see the LICENSE-APACHE or LICENSE-MIT files in this distribution for license details.
 // ------------------------------------------------------------------------------------------------
 
+use lsp_positions::Span;
+use lsp_positions::SpanCalculator;
 use stack_graphs::arena::Handle;
+use stack_graphs::arena::SupplementalArena;
 use stack_graphs::graph::File;
 use stack_graphs::graph::Node;
 use stack_graphs::graph::NodeID;
@@ -31,7 +34,9 @@ pub enum LoadError {
 pub trait LoadGraph {
     fn load_into_graph(
         &self,
+        source: &str,
         stack_graph: &mut StackGraph,
+        spans: &mut SupplementalArena<Node, Span>,
         file: Handle<File>,
     ) -> Result<(), LoadError>;
 }
@@ -39,9 +44,12 @@ pub trait LoadGraph {
 impl LoadGraph for Graph<'_> {
     fn load_into_graph(
         &self,
+        source: &str,
         stack_graph: &mut StackGraph,
+        spans: &mut SupplementalArena<Node, Span>,
         file: Handle<File>,
     ) -> Result<(), LoadError> {
+        let mut span_calculator = SpanCalculator::new(source);
         let mut sg_nodes = Vec::with_capacity(self.node_count());
         for (index, node_ref) in self.iter_nodes().enumerate() {
             let node = &self[node_ref];
@@ -56,6 +64,7 @@ impl LoadGraph for Graph<'_> {
                 NodeType::Reference => load_reference(stack_graph, file, index, node, node_ref)?,
                 NodeType::Root => load_root(stack_graph),
             };
+            load_span(spans, &mut span_calculator, self, node, handle)?;
             sg_nodes.push(handle);
         }
         Ok(())
@@ -213,4 +222,19 @@ fn load_reference(
 
 fn load_root(stack_graph: &mut StackGraph) -> Handle<Node> {
     stack_graph.root_node()
+}
+
+fn load_span(
+    spans: &mut SupplementalArena<Node, Span>,
+    span_calculator: &mut SpanCalculator,
+    graph: &Graph,
+    node: &GraphNode,
+    node_handle: Handle<Node>,
+) -> Result<(), LoadError> {
+    let source_node = match node.attributes.get("source_node") {
+        Some(source_node) => source_node.as_syntax_node(graph)?,
+        None => return Ok(()),
+    };
+    spans[node_handle] = span_calculator.for_node(source_node);
+    Ok(())
 }

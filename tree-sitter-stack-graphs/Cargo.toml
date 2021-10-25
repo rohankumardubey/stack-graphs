@@ -20,6 +20,7 @@ copious-debugging = []
 test = false
 
 [dependencies]
+lsp-positions = { version="0.1", path="../lsp-positions" }
 stack-graphs = { version="0.3", path="../stack-graphs" }
 thiserror = "1.0"
 
