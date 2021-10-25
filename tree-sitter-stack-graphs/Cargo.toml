@@ -21,8 +21,9 @@ test = false
 
 [dependencies]
 lsp-positions = { version="0.1", path="../lsp-positions" }
-stack-graphs = { version="0.3", path="../stack-graphs" }
+stack-graphs = { version="0.3", path="../stack-graphs", features=["lsp-positions"] }
 thiserror = "1.0"
+tree-sitter = { version=">= 0.19" }
 
 [dependencies.tree-sitter-graph]
 version ="0.2"
